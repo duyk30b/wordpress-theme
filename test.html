@@ -1,35 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Highlight.js TypeScript Example</title>
-    <!-- Thêm CSS của Highlight.js với theme Tomorrow Night -->
-
-</head>
-
 <body>
-    <!-- Đoạn mã TypeScript của bạn với cú pháp highlight -->
-    <pre><code>
-        // Đây là một đoạn mã TypeScript
-        class Greeter {
-            greeting: string;
-            constructor(message: string) {
-                this.greeting = message;
-            }
-            greet() {
-                return "Hello, " + this.greeting;
-            }
+    <button id="btn-throttle">Button Throttle</button>
+    <script>
+        const throttle = (func, delay) => {
+            let lastCall = 0;
+
+            return function (...args) {
+                const now = new Date().getTime();
+
+                if (now - lastCall >= delay) {
+                    lastCall = now;
+                    return func(...args);
+                }
+            };
         }
 
-        let greeter = new Greeter("world");
-        console.log(greeter.greet());
-    </code></pre>
+        const senDataThrottle = throttle((data) => {
+            console.log('Send data throttle:', data);
+        }, 1000);
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+        document.getElementById('btn-throttle').onclick = () => {
+            senDataThrottle(new Date())
+        }
+    </script>
 </body>
 
 </html>
