@@ -48,6 +48,8 @@ td, th {
 pre,
 code {
   font-family: monospace, monospace;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 summary {

@@ -28,13 +28,18 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
-td, th {
+
+td,
+th {
     border: 1px solid #cdcdcd;
     padding: 0 5px;
 }
+
 pre,
 code {
     font-family: monospace, monospace;
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 summary {
