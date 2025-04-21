@@ -1,12 +1,13 @@
-@import "./common/reset";
-@import "./common/base";
+@use "./common/reset";
+@use "./common/base";
 
-@import "./layouts/header";
-@import "./layouts/main";
-@import "./layouts/footer";
+@use "./layouts/header";
+@use "./layouts/main";
+@use "./layouts/footer";
 
-@import "./components/category-box";
-@import "./components/pagination";
+@use "./components/category-box";
+@use "./components/modal";
+@use "./components/pagination";
 
 .home-page {
 	padding: 0 10px;
@@ -68,11 +69,13 @@
 				border-top: 1px solid #cdcdcd;
 				font-size: 22px;
 				color: green;
+				clear: both;
 			}
 			h3 {
 				font-size: 18px;
 				color: rgba(0, 0, 122, 0.74);
 				margin-top: 10px;
+				clear: both;
 			}
 			h4 {
 				font-size: 14px;
@@ -92,6 +95,9 @@
 				border: 1px solid #e6e6e6;
 				border-left: 6px solid #e6e6e6;
 				background: #f8f8f8;
+			}
+			img {
+				float: right;
 			}
 		}
 	}

@@ -8,7 +8,7 @@
     <?php wp_head(); ?>
     <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
     <link rel="icon" type="image/x-icon" href="<?php bloginfo('template_directory'); ?>/images/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="<?php bloginfo('stylesheet_url'); ?>" />
+    <link rel="stylesheet" type="text/css" href="<?php echo get_stylesheet_directory_uri(); ?>/style.css?ver=<?php echo filemtime(get_stylesheet_directory() . '/style.css'); ?>" />
     	<!-- Google tag (gtag.js) - Google Analytics Ads -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-205398215-1">
 	</script>
@@ -63,9 +63,9 @@
                 <h1 class="description">Chuyên mua bán và cho thuê tại Hà Nội</h1>
                 <p class="phone">
                     Liên hệ:
-                    <span class="phone-item">0968100994</span>
+                    <span class="phone-item">0968.100.994</span>
                     hoặc
-                    <span class="phone-item">0986.021.190</span>
+                    <span class="phone-item">0376.899.866</span>
                 </p>
             </div>
         </div>

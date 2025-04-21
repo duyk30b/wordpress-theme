@@ -6,7 +6,7 @@
             <ul>
                 <li>
                     <i class="phone-solid" style="color:#555"></i>
-                    <a href="tel:0986021190" rel="bookmark">0986.021.190</a>
+                    <a href="tel:0986021190" rel="bookmark">0376.899.866</a>
                 </li>
                 <li>
                     <i class="envelope-solid" style="color:#555"></i>
@@ -85,7 +85,6 @@
     window.addEventListener('click', e => {
         // nếu click vào ảnh có root và không phải thumbnail thì hiện modal
         if (e.target.closest('img') && e.target.getAttribute("root") && !e.target.closest('.post-thumbnail')) {
-            console.log("openm =")
             const modal = document.getElementById('modal-image-root')
             const img = modal.querySelector("img")
 

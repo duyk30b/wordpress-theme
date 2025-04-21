@@ -1,0 +1,18 @@
+{
+  "name": "wordpress-theme",
+  "version": "1.0.0",
+  "main": "test.js",
+  "scripts": {
+    "build-css": "sass ./duycode/style.scss ./duycode/style.css",
+    "watch-css": "sass --watch ./duycode/style.scss:./duycode/style.css",
+    "zip": "zip -r duycode.zip duycode",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "sass": "^1.86.3"
+  }
+}
