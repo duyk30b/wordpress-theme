@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JS Variable Finder</title>
+  <style>html, body, #container { height: 100%; margin: 0; }</style>
+</head>
+<body>
+  <div id="container" style="height: 300px;"></div>
+  <button onclick="findVariables()">Tìm biến</button>
+
+  <!-- Monaco loader -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
+
+  <script>
+    require.config({
+      paths: {
+        'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs',
+        'acorn': 'https://cdn.jsdelivr.net/npm/acorn@8.11.3/dist/acorn'
+      }
+    });
+
+    let acornInstance, editor;
+
+    require(['vs/editor/editor.main', 'acorn'], function (monaco, acorn) {
+      acornInstance = acorn;
+
+      editor = monaco.editor.create(document.getElementById('container'), {
+        value: [
+          'let a = 1;',
+          'const b = "hello";',
+          'var c;',
+          'function test() { let d = 4; }'
+        ].join('\n'),
+        language: 'javascript'
+      });
+    });
+
+    function findVariables() {
+      const code = editor.getValue();
+      const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
+      const vars = [];
+
+      walk(ast, node => {
+        if (node.type === 'VariableDeclarator' && node.id && node.id.name) {
+          vars.push(node.id.name);
+        }
+        if (node.type === 'FunctionDeclaration' && node.id) {
+          vars.push(node.id.name);
+        }
+        if (node.type === 'ClassDeclaration' && node.id) {
+          vars.push(node.id.name);
+        }
+      });
+
+      alert('Các biến đã khai báo: ' + vars.join(', '));
+    }
+
+    function walk(node, callback) {
+      callback(node);
+      for (let key in node) {
+        const child = node[key];
+        if (Array.isArray(child)) {
+          child.forEach(n => n && typeof n.type === 'string' && walk(n, callback));
+        } else if (child && typeof child.type === 'string') {
+          walk(child, callback);
+        }
+      }
+    }
+  </script>
+</body>
+</html>

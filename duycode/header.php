@@ -55,7 +55,7 @@
                                 <a class="topleft" href="<?php bloginfo('siteurl'); ?>/wp-admin" target="_blank" title="Admin"> Login </a>
                             </li>
                             <li class="cat-item">
-                                <a href="<?php bloginfo('template_directory'); ?>/tools/monaco-editor.html" target="_blank" title="Monaco Editor"> Monaco Editor </a>
+                                <a href="<?php bloginfo('template_directory'); ?>/tools/monaco-html.html" target="_blank" title="Monaco HTML"> Monaco HTML </a>
                             </li>
                             <li class="cat-item">
                                 <a href="<?php bloginfo('template_directory'); ?>/tools/WYSIWYGeditor1.0.html" target="_blank" title="WYSIWYGeditor1.0"> WYSIWYGeditor </a>
