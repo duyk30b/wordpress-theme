@@ -1,72 +1,114 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>JS Variable Finder</title>
-  <style>html, body, #container { height: 100%; margin: 0; }</style>
-</head>
-<body>
-  <div id="container" style="height: 300px;"></div>
-  <button onclick="findVariables()">Tìm biến</button>
-
-  <!-- Monaco loader -->
-  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
-
-  <script>
-    require.config({
-      paths: {
-        'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs',
-        'acorn': 'https://cdn.jsdelivr.net/npm/acorn@8.11.3/dist/acorn'
+  <head>
+    <meta charset="UTF-8" />
+    <title>JS Variable Finder</title>
+    <style>
+      html,
+      body {
+        height: calc(100% - 0px);
+        width: calc(100% - 10px);
+        margin: 0;
       }
-    });
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      #editor {
+        flex: 1;
+      }
+      #preview {
+        flex: 1;
+        background-color: violet;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editor"></div>
+    <div id="preview"></div>
 
-    let acornInstance, editor;
+    <!-- Monaco loader -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
 
-    require(['vs/editor/editor.main', 'acorn'], function (monaco, acorn) {
-      acornInstance = acorn;
-
-      editor = monaco.editor.create(document.getElementById('container'), {
-        value: [
-          'let a = 1;',
-          'const b = "hello";',
-          'var c;',
-          'function test() { let d = 4; }'
-        ].join('\n'),
-        language: 'javascript'
-      });
-    });
-
-    function findVariables() {
-      const code = editor.getValue();
-      const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
-      const vars = [];
-
-      walk(ast, node => {
-        if (node.type === 'VariableDeclarator' && node.id && node.id.name) {
-          vars.push(node.id.name);
-        }
-        if (node.type === 'FunctionDeclaration' && node.id) {
-          vars.push(node.id.name);
-        }
-        if (node.type === 'ClassDeclaration' && node.id) {
-          vars.push(node.id.name);
-        }
+    <script>
+      require.config({
+        paths: {
+          vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs",
+          acorn: "https://cdn.jsdelivr.net/npm/acorn@8.11.3/dist/acorn",
+        },
       });
 
-      alert('Các biến đã khai báo: ' + vars.join(', '));
-    }
+      let acornInstance, editor;
 
-    function walk(node, callback) {
-      callback(node);
-      for (let key in node) {
-        const child = node[key];
-        if (Array.isArray(child)) {
-          child.forEach(n => n && typeof n.type === 'string' && walk(n, callback));
-        } else if (child && typeof child.type === 'string') {
-          walk(child, callback);
+      require(["vs/editor/editor.main", "acorn"], function (monaco, acorn) {
+        acornInstance = acorn;
+
+        editor = monaco.editor.create(document.getElementById("editor"), {
+          value: "",
+          language: "javascript",
+          theme: "vs-dark",
+          automaticLayout: true,
+          formatOnType: true,
+          minimap: { enabled: false },
+          tabSize: 2,
+          autoClosingBrackets: "always",
+          autoClosingQuotes: "always",
+        });
+
+        editor.addAction({
+          id: `format-javascript`,
+          label: "Format Document",
+          keybindings: [
+            monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF,
+          ],
+          run: function () {
+            return editor.getAction("editor.action.formatDocument")?.run();
+          },
+        });
+        editor.getModel()?.onDidChangeContent(() => {
+          findVariables();
+        });
+      });
+
+      function findVariables() {
+        const code = editor.getValue();
+        const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
+        const vars = [];
+
+        walk(ast, (node) => {
+          if (node.type === "VariableDeclarator" && node.id && node.id.name) {
+            vars.push(node.id.name);
+          }
+          if (node.type === "FunctionDeclaration" && node.id) {
+            vars.push(node.id.name);
+          }
+          if (node.type === "ClassDeclaration" && node.id) {
+            vars.push(node.id.name);
+          }
+        });
+
+        const preview = document.getElementById("preview");
+        console.log(
+          "🚀 ~ monaco-js.html:92 ~ findVariables ~ preview:",
+          preview
+        );
+        console.log('🚀 ~ monaco-js.html:97 ~ findVariables ~ vars:', vars)
+        preview.innerHTML = vars.join(", ");
+      }
+
+      function walk(node, callback) {
+        callback(node);
+        for (let key in node) {
+          const child = node[key];
+          if (Array.isArray(child)) {
+            child.forEach(
+              (n) => n && typeof n.type === "string" && walk(n, callback)
+            );
+          } else if (child && typeof child.type === "string") {
+            walk(child, callback);
+          }
         }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
