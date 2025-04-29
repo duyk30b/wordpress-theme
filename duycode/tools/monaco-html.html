@@ -59,6 +59,10 @@
             tabSize: 2,
             autoClosingBrackets: "always",
             autoClosingQuotes: "always",
+            padding: {
+              top: 12,
+              bottom: 12,
+            },
           });
 
           editor.addAction({
@@ -75,7 +79,7 @@
             const content = editor.getValue();
             reloadPreview(content);
           });
-          
+
           return editor;
         }
 
