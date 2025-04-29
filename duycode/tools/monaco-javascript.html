@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>JS Variable Finder</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #1e1e1e;
+        color: white;
+      }
+
+      body {
+        display: flex;
+        flex-direction: row;
+      }
+
+      #editor {
+        width: 50%;
+        height: 100%;
+      }
+
+      #preview {
+        width: 50%;
+        height: 100%;
+        padding: 20px;
+        background-color: #252526;
+        box-sizing: border-box;
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th,
+      td {
+        border: 1px solid #444;
+        text-align: left;
+      }
+
+      th {
+        background-color: #333;
+        padding: 8px;
+      }
+      td {
+        padding: 0 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editor"></div>
+    <div id="preview">
+      <h3>Kết quả biến đã khai báo</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Tên biến</th>
+            <th>Giá trị</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Monaco loader -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
+
+    <script>
+      require.config({
+        paths: {
+          vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs",
+          acorn: "https://cdn.jsdelivr.net/npm/acorn@8.11.3/dist/acorn",
+        },
+      });
+
+      let acornInstance, editor;
+
+      require(["vs/editor/editor.main", "acorn"], function (monaco, acorn) {
+        acornInstance = acorn;
+
+        editor = monaco.editor.create(document.getElementById("editor"), {
+          value: "",
+          language: "javascript",
+          theme: "vs-dark",
+          automaticLayout: true,
+          formatOnType: true,
+          minimap: { enabled: false },
+          tabSize: 2,
+          autoClosingBrackets: "always",
+          autoClosingQuotes: "always",
+          padding: {
+            top: 24,
+            bottom: 12,
+          },
+        });
+
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+          target: monaco.languages.typescript.ScriptTarget.ES2020,
+          allowNonTsExtensions: true,
+          moduleResolution:
+            monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+          module: monaco.languages.typescript.ModuleKind.ESNext,
+          noLib: false,
+          typeRoots: ["node_modules/@types"],
+        });
+
+        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: false,
+          noSyntaxValidation: false,
+        });
+
+        editor.addAction({
+          id: `format-javascript`,
+          label: "Format Document",
+          keybindings: [
+            monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF,
+          ],
+          run: function () {
+            return editor.getAction("editor.action.formatDocument")?.run();
+          },
+        });
+        editor.getModel()?.onDidChangeContent(() => {
+          findVariables(editor.getValue());
+        });
+      });
+
+      function findVariables(code) {
+        try {
+          const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
+          const vars = [];
+
+          walk(ast, (node) => {
+            if (node.type === "VariableDeclarator" && node.id && node.id.name) {
+              vars.push(node.id.name);
+            }
+            if (node.type === "FunctionDeclaration" && node.id) {
+              vars.push(node.id.name);
+            }
+            if (node.type === "ClassDeclaration" && node.id) {
+              vars.push(node.id.name);
+            }
+          });
+
+          const func = new Function(`
+            ${code}
+            return { ${[...vars].join(",")} };
+          `);
+
+          const result = func();
+
+          let tbodyHTML = ``;
+          for (const key of Object.keys(result)) {
+            let val = result[key];
+            if (typeof val === "object" && val !== null) {
+              try {
+                val = JSON.stringify(val, null, 2);
+              } catch {
+                val = "[Circular]";
+              }
+            }
+            tbodyHTML += `<tr><td>${key}</td><td><pre>${val}</pre></td></tr>`;
+          }
+          document.getElementById("tbody").innerHTML = tbodyHTML;
+        } catch (error) {
+          console.log("🚀 ~ ~ findVariables ~ error:", error);
+        }
+      }
+
+      function walk(node, callback, depth = 0) {
+        callback(node, depth);
+
+        // Nếu là function block thì không duyệt sâu vào trong
+        const blockScopeTypes = [
+          "FunctionDeclaration",
+          "FunctionExpression",
+          "ArrowFunctionExpression",
+        ];
+
+        if (blockScopeTypes.includes(node.type)) {
+          return; // dừng lại không duyệt sâu
+        }
+
+        for (let key in node) {
+          const child = node[key];
+          if (Array.isArray(child)) {
+            child.forEach(
+              (n) =>
+                n && typeof n.type === "string" && walk(n, callback, depth + 1)
+            );
+          } else if (child && typeof child.type === "string") {
+            walk(child, callback, depth + 1);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

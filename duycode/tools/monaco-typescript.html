@@ -86,7 +86,7 @@
 
         editor = monaco.editor.create(document.getElementById("editor"), {
           value: "",
-          language: "javascript",
+          language: "typescript",
           theme: "vs-dark",
           automaticLayout: true,
           formatOnType: true,
@@ -95,12 +95,12 @@
           autoClosingBrackets: "always",
           autoClosingQuotes: "always",
           padding: {
-            top: 12,
+            top: 24,
             bottom: 12,
           },
         });
 
-        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
           target: monaco.languages.typescript.ScriptTarget.ES2020,
           allowNonTsExtensions: true,
           moduleResolution:
@@ -110,13 +110,13 @@
           typeRoots: ["node_modules/@types"],
         });
 
-        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
           noSemanticValidation: false,
           noSyntaxValidation: false,
         });
 
         editor.addAction({
-          id: `format-javascript`,
+          id: `format-typescript`,
           label: "Format Document",
           keybindings: [
             monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF,
@@ -125,14 +125,32 @@
             return editor.getAction("editor.action.formatDocument")?.run();
           },
         });
+
         editor.getModel()?.onDidChangeContent(() => {
-          findVariables();
+          const content = editor.getValue();
+          const model = editor.getModel();
+          monaco.languages.typescript
+            .getTypeScriptWorker()
+            .then((worker) => worker(model.uri))
+            .then((client) => {
+              client.getEmitOutput(model.uri.toString()).then((result) => {
+                const jsOutput = result.outputFiles.find((file) =>
+                  file.name.endsWith(".js")
+                );
+                if (jsOutput) {
+                  console.log("✨ JavaScript Output:");
+                  console.log(jsOutput.text);
+                  findVariables(jsOutput.text);
+                } else {
+                  console.warn("No JS output generated.");
+                }
+              });
+            });
         });
       });
 
-      function findVariables() {
+      function findVariables(code) {
         try {
-          const code = editor.getValue();
           const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
           const vars = [];
 

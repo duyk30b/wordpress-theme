@@ -58,7 +58,10 @@
                                 <a href="<?php bloginfo('template_directory'); ?>/tools/monaco-html.html" target="_blank" title="Monaco HTML"> Monaco HTML </a>
                             </li>
                             <li class="cat-item">
-                                <a href="<?php bloginfo('template_directory'); ?>/tools/monaco-js.html" target="_blank" title="Monaco Javascript"> Monaco Javascript </a>
+                                <a href="<?php bloginfo('template_directory'); ?>/tools/monaco-javascript.html" target="_blank" title="Monaco Javascript"> Monaco Javascript </a>
+                            </li>
+                            <li class="cat-item">
+                                <a href="<?php bloginfo('template_directory'); ?>/tools/monaco-typescript.html" target="_blank" title="Monaco Typescript"> Monaco Typescript </a>
                             </li>
                             <li class="cat-item">
                                 <a href="<?php bloginfo('template_directory'); ?>/tools/WYSIWYGeditor1.0.html" target="_blank" title="WYSIWYGeditor1.0"> WYSIWYGeditor </a>
