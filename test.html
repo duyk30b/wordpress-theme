@@ -1,11 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Monaco Editor - Multi Language</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      #editors {
+        display: flex;
+        flex: 1;
+      }
+      .editor-container {
+        flex: 1;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editors">
+      <div id="html-editor" class="editor-container"></div>
+      <div id="css-editor" class="editor-container"></div>
+      <div id="js-editor" class="editor-container"></div>
+    </div>
+
+    <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+    <script>
+      require.config({
+        paths: { vs: "https://unpkg.com/monaco-editor@latest/min/vs" },
+      });
+
+      require(["vs/editor/editor.main"], function () {
+        function createEditor(domId, language, value) {
+          const editor = monaco.editor.create(document.getElementById(domId), {
+            value,
+            language,
+            theme: "vs",
+            automaticLayout: true,
+            formatOnType: true,
+            minimap: { enabled: false },
+            tabSize: 2,
+            autoClosingBrackets: "always",
+            autoClosingQuotes: "always",
+          });
+
+          editor.addAction({
+            id: `format-${language}`,
+            label: "Format Document",
+            keybindings: [
+              monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF,
+            ],
+            run: function () {
+              return editor.getAction("editor.action.formatDocument")?.run();
+            },
+          });
+          editor.getModel()?.onDidChangeContent(() => {
+            const content = editor.getValue();
+            console.log('🚀 ~ editor.4.0.html:63 ~ editor.getModel ~ content:', content)
+          });
+          
+          return editor;
+        }
+
+        const htmlEditor = createEditor("html-editor", "html", ``);
+        const cssEditor = createEditor("css-editor", "css", ``);
+        const jsEditor = createEditor("js-editor", "javascript", ``);
+      });
+    </script>
+  </body>
 </html>

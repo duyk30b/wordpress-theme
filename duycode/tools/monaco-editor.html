@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Monaco Editor - Multi Language</title>
+    <style>
+      html,
+      body {
+        height: calc(100% - 20px);
+        width: calc(100% - 10px);
+      }
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      #HTMLEditor {
+        flex-basis: 40%;
+        min-width: 400px;
+        flex: 1;
+        border: 1px solid #ccc;
+        padding: 10px 0;
+      }
+
+      #Preview {
+        flex-basis: 40%;
+        min-width: 400px;
+        flex: 1;
+      }
+      #Preview iframe {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="HTMLEditor"></div>
+    <!-- <div id="css-editor" class="editor-container"></div>
+    <div id="js-editor" class="editor-container"></div> -->
+    <div id="Preview">
+      <iframe></iframe>
+    </div>
+
+    <script src="https://unpkg.com/monaco-editor@0.52.2/min/vs/loader.js"></script>
+    <script>
+      require.config({
+        paths: { vs: "https://unpkg.com/monaco-editor@0.52.2/min/vs" },
+      });
+
+      require(["vs/editor/editor.main"], function () {
+        function createEditor(domId, language, value) {
+          const editor = monaco.editor.create(document.getElementById(domId), {
+            value,
+            language,
+            theme: "vs",
+            automaticLayout: true,
+            formatOnType: true,
+            minimap: { enabled: false },
+            tabSize: 2,
+            autoClosingBrackets: "always",
+            autoClosingQuotes: "always",
+          });
+
+          editor.addAction({
+            id: `format-${language}`,
+            label: "Format Document",
+            keybindings: [
+              monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF,
+            ],
+            run: function () {
+              return editor.getAction("editor.action.formatDocument")?.run();
+            },
+          });
+          editor.getModel()?.onDidChangeContent(() => {
+            const content = editor.getValue();
+            reloadPreview(content);
+          });
+          
+          return editor;
+        }
+
+        const htmlEditor = createEditor("HTMLEditor", "html", ``);
+        // const cssEditor = createEditor("css-editor", "css", ``);
+        // const jsEditor = createEditor("js-editor", "javascript", ``);
+      });
+
+      var Preview = document.getElementById("Preview");
+      var HTMLEditor = document.getElementById("HTMLEditor");
+      var CSSEditor = document.getElementById("CSSEditor");
+      var JSEditor = document.getElementById("JSEditor");
+
+      let reloadPreview = (htmlContent) => {
+        Preview.innerHTML = "";
+        let iframeNode = document.createElement("iframe");
+        Preview.appendChild(iframeNode);
+        let myFrame = Preview.getElementsByTagName("iframe")[0];
+        writeWindow(myFrame.contentWindow, htmlContent);
+      };
+
+      let writeWindow = (w, htmlContent, cssContent, jsContent) => {
+        w.document.open();
+        w.document.write(htmlContent);
+        let cssElement = document.createElement("style");
+        let jsElement = document.createElement("script");
+        cssElement.innerHTML = cssContent || "";
+        jsElement.innerHTML = jsContent || "";
+        w.document?.head?.append(cssElement);
+        w.document?.body?.append(jsElement);
+        w.document.close();
+      };
+    </script>
+  </body>
+</html>

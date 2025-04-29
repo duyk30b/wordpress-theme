@@ -17,8 +17,7 @@
     // nếu click vào ảnh có root và không phải thumbnail thì hiện modal
     if (
       e.target.closest("img") &&
-      e.target.getAttribute("show-modal") != null &&
-      !e.target.closest(".post-thumbnail")
+      e.target.getAttribute("show-modal") != null 
     ) {
       const modal = document.getElementById("modal-image-root");
       const modalImage = modal.querySelector("img");
