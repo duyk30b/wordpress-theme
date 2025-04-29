@@ -19,7 +19,6 @@
       }
       #preview {
         flex: 1;
-        background-color: violet;
       }
     </style>
   </head>
@@ -71,41 +70,72 @@
       });
 
       function findVariables() {
-        const code = editor.getValue();
-        const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
-        const vars = [];
+        try {
+          const code = editor.getValue();
+          const ast = acornInstance.parse(code, { ecmaVersion: 2020 });
+          const vars = [];
 
-        walk(ast, (node) => {
-          if (node.type === "VariableDeclarator" && node.id && node.id.name) {
-            vars.push(node.id.name);
-          }
-          if (node.type === "FunctionDeclaration" && node.id) {
-            vars.push(node.id.name);
-          }
-          if (node.type === "ClassDeclaration" && node.id) {
-            vars.push(node.id.name);
-          }
-        });
+          walk(ast, (node) => {
+            if (node.type === "VariableDeclarator" && node.id && node.id.name) {
+              vars.push(node.id.name);
+            }
+            if (node.type === "FunctionDeclaration" && node.id) {
+              vars.push(node.id.name);
+            }
+            if (node.type === "ClassDeclaration" && node.id) {
+              vars.push(node.id.name);
+            }
+          });
 
-        const preview = document.getElementById("preview");
-        console.log(
-          "🚀 ~ monaco-js.html:92 ~ findVariables ~ preview:",
-          preview
-        );
-        console.log('🚀 ~ monaco-js.html:97 ~ findVariables ~ vars:', vars)
-        preview.innerHTML = vars.join(", ");
+          const func = new Function(`
+            ${code}
+            return { ${[...vars].join(",")} };
+          `);
+
+          const result = func();
+          const output = [];
+
+          for (const key of Object.keys(result)) {
+            let val = result[key];
+            if (typeof val === "object" && val !== null) {
+              try {
+                val = JSON.stringify(val);
+              } catch {
+                val = "[Circular]";
+              }
+            }
+            output.push(`${key}: ${val}`);
+            const preview = document.getElementById("preview");
+            preview.innerHTML = output.join("; \n");
+          }
+        } catch (error) {
+          console.log("🚀 ~ ~ findVariables ~ error:", error);
+        }
       }
 
-      function walk(node, callback) {
-        callback(node);
+      function walk(node, callback, depth = 0) {
+        callback(node, depth);
+
+        // Nếu là function block thì không duyệt sâu vào trong
+        const blockScopeTypes = [
+          "FunctionDeclaration",
+          "FunctionExpression",
+          "ArrowFunctionExpression",
+        ];
+
+        if (blockScopeTypes.includes(node.type)) {
+          return; // dừng lại không duyệt sâu
+        }
+
         for (let key in node) {
           const child = node[key];
           if (Array.isArray(child)) {
             child.forEach(
-              (n) => n && typeof n.type === "string" && walk(n, callback)
+              (n) =>
+                n && typeof n.type === "string" && walk(n, callback, depth + 1)
             );
           } else if (child && typeof child.type === "string") {
-            walk(child, callback);
+            walk(child, callback, depth + 1);
           }
         }
       }
